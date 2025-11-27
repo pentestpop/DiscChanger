@@ -1,0 +1,40 @@
+{
+  "name": "disc-changer-app",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --mac --dir", 
+    "dist": "electron-builder --mac"
+  },
+  "author": "Your Name",
+  "description": "Music Rotator and Downloader",
+  "build": {
+    "appId": "com.pop.discchanger",
+    "productName": "Disc Changer",
+    "mac": {
+      "icon": "build/icon.icns",
+      "target": "dmg"
+    },
+    "files": [
+      "**/*",
+      "bin/*" 
+    ],
+    "extraResources": [
+      {
+        "from": "bin",
+        "to": "bin",
+        "filter": ["**/*"]
+      }
+    ]
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^26.0.12"
+  }
+}
