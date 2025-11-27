@@ -2,7 +2,8 @@
 
 This project is part of an effort to reject the paralysis of choice and respect the effort of music creation by enforcing scarcity with intentionality. 
 
-Currently the project is merely a AppleScript file which selects 10 albums from my music library at random and adds them to a playlist titled Current Rotation. I can sync this playlist, and only this playlist to my phone, inspiring me to enjoy the music I have collected with purpose. 
+## Instructions to Download
+
 
 # Future Goals
 
