@@ -42,7 +42,3 @@ You can:
 You can paste the URL of YouTube videos here to download them to the folder of your choice. It works with either single songs or playlists, and for playlists you can set the Arist and Album if you want to ensure that the files come in with those tags. Sometimes this can be an issue when downloading from YouTube. 
 
 <img src="Images/downloader.png" height="800"/>
-
-
-## Future Goals
-It would be really cool to find a way to add a certain number of genres to the playlist each time it's updated. For example, to add no more than 3 Workout albums, and to require adding 2 albums tagged in a way that reflects that they are albums I've been meaning to listen to for a while. This can be done with genre somewhat easily, but functionality would be severely limited. For me to do it with Comments or Tags, I need to considerably update the metadata in my library. TBD. 
