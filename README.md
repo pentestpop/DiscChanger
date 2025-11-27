@@ -29,7 +29,7 @@ The purpose of this is to build playlist which random selects 10 (or another cho
 1. Load Library (uses an AppleScript to load your music library metadata into the app)
 2. Generate Playlist (generates the playlist based on options)
 
-<img src="Images/rotation.png" height="600"/>
+<img src="Images/rotation.png" height="800"/>
 
 ![Rotation](Images/rotation.png)
 
