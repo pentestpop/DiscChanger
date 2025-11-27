@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Music & Video Toolkit</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; padding: 20px; display: flex; gap: 20px; color: #333; height: 100vh; box-sizing: border-box; }
+        .card { background: white; padding: 25px; border-radius: 12px; width: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+        h2 { margin: 0 0 5px 0; color: #1e3c72; font-size: 18px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+        
+        label { font-weight: 600; font-size: 11px; display: block; margin-bottom: 4px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+        
+        input[type="text"], input[type="number"], select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box; font-size: 13px; }
+        input:focus { outline: none; border-color: #1e3c72; }
+        
+        button { padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 13px; }
+        button.primary { background: #1e3c72; color: white; width: 100%; margin-top: 5px; padding: 12px; }
+        button.secondary { background: #e2e6ea; color: #333; }
+        button:hover { opacity: 0.9; }
+
+        .status { padding: 10px; border-radius: 6px; font-size: 12px; display: none; line-height: 1.4; white-space: pre-wrap; margin-top: auto; }
+        .success { background: #d4edda; color: #155724; display: block; }
+        .error { background: #f8d7da; color: #721c24; display: block; }
+
+        .input-group { position: relative; display: flex; gap: 5px; }
+        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; max-height: 200px; overflow-y: auto; z-index: 100; display: none; border-radius: 0 0 6px 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .autocomplete-item { padding: 8px; cursor: pointer; font-size: 13px; }
+        .autocomplete-item:hover { background: #f0f0f0; }
+
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 5px; }
+        .tag { background: #eef2ff; color: #1e3c72; padding: 4px 10px; border-radius: 12px; font-size: 11px; display: flex; align-items: center; gap: 6px; border: 1px solid #c7d2fe; }
+        .tag span { cursor: pointer; font-weight: bold; color: #888; }
+        .rule-row { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 12px; background:#f8f9fa; padding: 4px; border-radius: 4px;}
+        
+        .meta-box { background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #e9ecef; }
+        .checkbox-label { display: flex; align-items: center; gap: 6px; font-weight: normal; text-transform: none; cursor: pointer; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🎵 Music Rotation</h2>
+        
+        <div class="row">
+            <button id="loadLibBtn" class="secondary" style="flex:1">1. Load Library</button>
+            <div id="libStatus" style="flex:1; display:flex; align-items:center; font-size:11px; color:#666; justify-content:flex-end;"></div>
+        </div>
+
+        <div class="row">
+            <div class="col" style="flex: 2;">
+                <label>Playlist Name</label>
+                <input type="text" id="playlistName" value="Daily Rotation">
+            </div>
+            <div class="col">
+                <label>Total Albums</label>
+                <input type="number" id="albumCount" value="10">
+            </div>
+        </div>
+
+        <div>
+            <label>Must-Include Albums</label>
+            <div class="input-group">
+                <input type="text" id="albumInput" placeholder="Search albums..." autocomplete="off">
+                <div id="albumSuggestions" class="autocomplete-list"></div>
+                <button class="secondary" id="addAlbumBtn">Add</button>
+            </div>
+            <div id="mustIncludeList" class="tag-list" style="margin-top: 8px;"></div>
+        </div>
+
+        <div>
+            <label>Rules & Requirements</label>
+            <div class="input-group" style="margin-bottom:5px;">
+                <select id="ruleType" style="width: 30%;">
+                    <option value="genre">Genre</option>
+                    <option value="comment">Tag (Comment)</option>
+                </select>
+                <select id="ruleValue" style="width: 50%;">
+                    <option value="">Load library first...</option>
+                </select>
+                <button class="secondary" id="addRuleBtn" style="width: 20%;">Add</button>
+            </div>
+            <div id="ruleList"></div>
+        </div>
+
+        <button id="runRotateBtn" class="primary">2. Generate Playlist</button>
+        <div id="musicStatus" class="status"></div>
+    </div>
+
+    <div class="card">
+        <h2>📺 yt-dlp Downloader</h2>
+        <label>URL</label>
+        <input type="text" id="videoUrl" placeholder="https://youtube.com/...">
+        <div class="row" style="margin-top: 10px;">
+            <div class="col">
+                <label>Format</label>
+                <select id="dlFormat">
+                    <option value="video">Video (MP4)</option>
+                    <option value="mp3" selected>Audio (MP3)</option>
+                </select>
+            </div>
+            <div class="col">
+                <label>Save To</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="dlPath" placeholder="Downloads" readonly style="font-size:11px;">
+                    <button class="secondary" id="browseBtn">...</button>
+                </div>
+            </div>
+        </div>
+        <div class="meta-box">
+            <label>Metadata Overrides</label>
+            <div class="row">
+                <input type="text" id="metaArtist" placeholder="Artist">
+                <input type="text" id="metaAlbum" placeholder="Album">
+            </div>
+            <label class="checkbox-label">
+                <input type="checkbox" id="cleanTitle" checked> 
+                Clean Title (Remove "Official", "Remastered")
+            </label>
+        </div>
+        <button id="dlBtn" class="primary" style="background: #e0245e;">Download</button>
+        <div id="dlStatus" class="status"></div>
+    </div>
+
+    <script>
+        // --- STATE ---
+        let libraryData = { albums: [], genres: [], comments: [] };
+        let mustHaveAlbums = [];
+        let activeRules = []; 
+
+        // --- 1. LIBRARY PARSING (CRITICAL FIX) ---
+        document.getElementById('loadLibBtn').onclick = async () => {
+            setStatus('musicStatus', 'Reading Library... (This may take a minute)', 'success');
+            
+            // Robust AppleScript using ||| delimiter and missing value checks
+            const script = `
+                tell application "Music"
+                    set output to ""
+                    set allTracks to (get every file track of library playlist 1)
+                    repeat with t in allTracks
+                        set a to album of t
+                        set g to genre of t
+                        set c to comment of t
+                        
+                        if a is missing value then set a to ""
+                        if g is missing value then set g to ""
+                        if c is missing value then set c to ""
+                        
+                        set output to output & a & "|||" & g & "|||" & c & "\\n"
+                    end repeat
+                    return output
+                end tell
+            `;
+
+            try {
+                const data = await window.api.runScript(script);
+                
+                // --- THE CRITICAL FIX IS HERE ---
+                // We now split by regex for \r OR \n to prevent "one long line" errors
+                const lines = data.split(/[\r\n]+/).filter(l => l.trim().length > 0);
+                
+                const albSet = new Set();
+                const genSet = new Set();
+                const comSet = new Set();
+
+                lines.forEach(l => {
+                    const parts = l.split('|||');
+                    if (parts.length >= 3) {
+                        const alb = parts[0].trim();
+                        const gen = parts[1].trim();
+                        const com = parts[2].trim();
+                        
+                        if(alb) albSet.add(alb);
+                        if(gen) genSet.add(gen);
+                        if(com) comSet.add(com);
+                    }
+                });
+
+                libraryData.albums = Array.from(albSet).sort();
+                libraryData.genres = Array.from(genSet).sort();
+                libraryData.comments = Array.from(comSet).sort();
+
+                updateRuleDropdown();
+                document.getElementById('libStatus').innerText = `${libraryData.albums.length} albums loaded.`;
+                setStatus('musicStatus', `Success! Loaded ${libraryData.albums.length} albums.`, 'success');
+            } catch (err) {
+                setStatus('musicStatus', 'Error: ' + err, 'error');
+            }
+        };
+
+        // --- 2. AUTOCOMPLETE ---
+        const albumInput = document.getElementById('albumInput');
+        const suggestBox = document.getElementById('albumSuggestions');
+
+        albumInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            if(val.length < 1) { suggestBox.style.display = 'none'; return; }
+            
+            if (libraryData.albums.length === 0) {
+                suggestBox.innerHTML = '<div class="autocomplete-item" style="color:red">Load library first!</div>';
+                suggestBox.style.display = 'block';
+                return;
+            }
+
+            const matches = libraryData.albums.filter(a => 
+                a.toLowerCase().includes(val) && !mustHaveAlbums.includes(a)
+            ).slice(0, 10);
+            
+            if(matches.length > 0) {
+                suggestBox.innerHTML = matches.map(a => `<div class="autocomplete-item">${a}</div>`).join('');
+                suggestBox.style.display = 'block';
+            } else {
+                suggestBox.style.display = 'none';
+            }
+        });
+
+        suggestBox.addEventListener('click', (e) => {
+            if(e.target.classList.contains('autocomplete-item')) {
+                addMustHave(e.target.innerText);
+                albumInput.value = '';
+                suggestBox.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target !== albumInput && e.target !== suggestBox) suggestBox.style.display = 'none';
+        });
+
+        document.getElementById('addAlbumBtn').onclick = () => {
+            if(albumInput.value) addMustHave(albumInput.value);
+            albumInput.value = '';
+        };
+
+        function addMustHave(album) {
+            if(!mustHaveAlbums.includes(album)) {
+                mustHaveAlbums.push(album);
+                renderTags();
+            }
+        }
+
+        function removeMustHave(album) {
+            mustHaveAlbums = mustHaveAlbums.filter(a => a !== album);
+            renderTags();
+        }
+
+        function renderTags() {
+            const list = document.getElementById('mustIncludeList');
+            list.innerHTML = mustHaveAlbums.map(a => 
+                `<div class="tag">${a}<span onclick="removeMustHave('${a.replace(/'/g, "\\'")}')">×</span></div>`
+            ).join('');
+        }
+
+        // --- 3. RULES (Genres + Comments) ---
+        document.getElementById('ruleType').addEventListener('change', updateRuleDropdown);
+
+        function updateRuleDropdown() {
+            const type = document.getElementById('ruleType').value;
+            const sel = document.getElementById('ruleValue');
+            sel.innerHTML = '<option value="">Select...</option>';
+            
+            const source = type === 'genre' ? libraryData.genres : libraryData.comments;
+            if (source) {
+                source.forEach(item => {
+                    sel.innerHTML += `<option value="${item}">${item}</option>`;
+                });
+            }
+        }
+
+        document.getElementById('addRuleBtn').onclick = () => {
+            const type = document.getElementById('ruleType').value;
+            const val = document.getElementById('ruleValue').value;
+            
+            if(val) {
+                activeRules.push({ type, value: val, count: 1 });
+                renderRules();
+            }
+        };
+
+        function renderRules() {
+            const list = document.getElementById('ruleList');
+            list.innerHTML = activeRules.map((rule, idx) => `
+                <div class="rule-row">
+                    <input type="number" style="width:40px;" value="${rule.count}" min="1" onchange="updateRule(${idx}, this.value)">
+                    <span style="flex:1"><b>${rule.type === 'genre' ? 'Genre' : 'Tag'}</b>: ${rule.value}</span>
+                    <button class="secondary" style="padding:2px 6px;" onclick="removeRule(${idx})">×</button>
+                </div>
+            `).join('');
+        }
+
+        window.updateRule = (idx, count) => activeRules[idx].count = parseInt(count);
+        window.removeRule = (idx) => { activeRules.splice(idx, 1); renderRules(); };
+
+        // --- 4. GENERATION ---
+        document.getElementById('runRotateBtn').onclick = async () => {
+            const plName = document.getElementById('playlistName').value;
+            const total = document.getElementById('albumCount').value;
+            
+            // Build Applescript Data
+            const rulesString = '{' + activeRules.map(r => 
+                `{rType:"${r.type}", rValue:"${r.value.replace(/"/g, '\\"')}", rCount:${r.count}}`
+            ).join(',') + '}';
+            
+            const mustString = '{' + mustHaveAlbums.map(a => `"${a.replace(/"/g, '\\"')}"`).join(',') + '}';
+
+            const script = `
+            tell application "Music"
+                set plName to "${plName.replace(/"/g, '\\"')}"
+                set targetTotal to ${total}
+                set mustHaves to ${mustString}
+                set requirements to ${rulesString}
+                
+                try
+                    set pl to playlist plName
+                    delete every track of pl
+                on error
+                    set pl to make new playlist with properties {name:plName}
+                end try
+                
+                set allTracks to (get every file track of library playlist 1)
+                
+                set albumList to {}
+                set albumGenres to {}
+                set albumComments to {}
+                
+                repeat with t in allTracks
+                    set alb to album of t
+                    if alb is not in albumList then
+                        set end of albumList to alb
+                        set end of albumGenres to (genre of t)
+                        set c to comment of t
+                        if c is missing value then set c to ""
+                        set end of albumComments to c
+                    end if
+                end repeat
+                
+                set selectedAlbums to {}
+                
+                -- 1. Must Haves
+                repeat with m in mustHaves
+                    if (contents of m) is in albumList then
+                        set end of selectedAlbums to (contents of m)
+                    end if
+                end repeat
+                
+                -- 2. Rules
+                repeat with req in requirements
+                    set rType to rType of req
+                    set rValue to rValue of req
+                    set rCount to rCount of req
+                    set added to 0
+                    
+                    repeat while added < rCount
+                        set candidates to {}
+                        repeat with i from 1 to count of albumList
+                            set isMatch to false
+                            
+                            if rType is equal to "genre" then
+                                if item i of albumGenres is equal to rValue then set isMatch to true
+                            else if rType is equal to "comment" then
+                                if item i of albumComments contains rValue then set isMatch to true
+                            end if
+                            
+                            if isMatch is true then
+                                if item i of albumList is not in selectedAlbums then
+                                    set end of candidates to item i of albumList
+                                end if
+                            end if
+                        end repeat
+                        
+                        if (count of candidates) is 0 then exit repeat
+                        set picked to some item of candidates
+                        set end of selectedAlbums to picked
+                        set added to added + 1
+                    end repeat
+                end repeat
+                
+                -- 3. Remainder
+                repeat while (count of selectedAlbums) < targetTotal
+                    set picked to some item of albumList
+                    if picked is not in selectedAlbums then
+                        set end of selectedAlbums to picked
+                    end if
+                    if (count of selectedAlbums) is equal to (count of albumList) then exit repeat
+                end repeat
+                
+                -- 4. Add Tracks
+                set trackCount to 0
+                repeat with albName in selectedAlbums
+                    set albTracks to (every file track of library playlist 1 whose album is albName)
+                    repeat with t in albTracks
+                        duplicate t to pl
+                        set trackCount to trackCount + 1
+                    end repeat
+                end repeat
+                
+                return "Success: " & (count of selectedAlbums) & " albums added."
+            end tell
+            `;
+
+            try {
+                setStatus('musicStatus', 'Generating...', 'success');
+                const res = await window.api.runScript(script);
+                setStatus('musicStatus', res, 'success');
+            } catch (err) {
+                setStatus('musicStatus', err, 'error');
+            }
+        };
+
+        // --- 5. DOWNLOADER ---
+        document.getElementById('browseBtn').onclick = async () => {
+            const folder = await window.api.selectFolder();
+            if(folder) document.getElementById('dlPath').value = folder;
+        };
+
+        document.getElementById('dlBtn').onclick = async () => {
+            const url = document.getElementById('videoUrl').value;
+            if(!url) return alert("Enter URL");
+            
+            const options = {
+                url: url,
+                format: document.getElementById('dlFormat').value,
+                folder: document.getElementById('dlPath').value,
+                meta: {
+                    artist: document.getElementById('metaArtist').value,
+                    album: document.getElementById('metaAlbum').value,
+                    cleanTitle: document.getElementById('cleanTitle').checked
+                }
+            };
+            
+            setStatus('dlStatus', 'Downloading...', 'success');
+            try {
+                const res = await window.api.downloadVideo(options);
+                setStatus('dlStatus', res, 'success');
+            } catch (err) {
+                setStatus('dlStatus', err, 'error');
+            }
+        };
+
+        function setStatus(id, msg, type) {
+            const el = document.getElementById(id);
+            el.innerText = msg;
+            el.className = 'status ' + type;
+            el.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
